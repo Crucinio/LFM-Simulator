@@ -8,7 +8,7 @@ Emulator of Linear Frequency Modulation
 - **dt** - descreetization (sampling) frequency, Hz
 
 ## Output
-#### LMF Graph
+#### LFM Graph
 - Graph of modified signal
 - Graph of linear dependancy and current deviation
 
@@ -17,7 +17,7 @@ Emulator of Linear Frequency Modulation
 
 ## Structure
 #### SettingsWidget
-Widget that consists of LineEdits and Reset and Pause/Continue buttons. On reset sends the LFMSettings struct to the main class which resends it to LFMGraph widget. Also responsible for all the input validations.
+Widget that consists of LineEdits, Reset and Pause/Continue buttons. On reset sends the LFMSettings struct to the main class which resends it to LFMGraph widget. Also responsible for all the input validations.
 
 #### LFMGraphsHandlerWidget
 QTabWidget that consists of 2 tabs - LFMRangeWidget and LFMGraphWidget. Plays the role of observer and notifies the graphs to be updated on reset. Also controls the elapsed time between frames for real-time simulation. Derived from QTabWidget. Tabs - LRF Graph and LRF Range
