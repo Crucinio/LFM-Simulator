@@ -19,10 +19,16 @@ private:
     CyclicAmplitudeGraph* lfm_graph;
     CyclicAmplitudeGraph* df_graph;
 
-    bool is_paused;
+    bool is_paused = false;
+    float descreet_time = 0.01f;
 public:
     AmplitudeGraphsHandler(QWidget *parent = nullptr);
+    ~AmplitudeGraphsHandler();
 
+private slots:
+    void update_graphics();
+signals:
+    void need_update();
 public slots:
     void start();
     void reset(LFMSettings settings);
