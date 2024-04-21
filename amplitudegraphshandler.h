@@ -7,7 +7,7 @@
 
 #include <QVBoxLayout>
 #include <QWidget>
-
+#include <QSlider>
 
 
 class AmplitudeGraphsHandler : public QWidget
@@ -19,8 +19,11 @@ private:
     CyclicAmplitudeGraph* lfm_graph;
     CyclicAmplitudeGraph* df_graph;
 
+    QSlider* frame_slider;
+
     bool is_paused = false;
     float descreet_time = 0.01f;
+    int frame_value = 0;
 public:
     AmplitudeGraphsHandler(QWidget *parent = nullptr);
     ~AmplitudeGraphsHandler();
@@ -32,6 +35,7 @@ signals:
 public slots:
     void start();
     void reset(LFMSettings settings);
+    void process_slider(int val);
 };
 
 #endif // AMPLITUDEGRAPHSHANDLER_H

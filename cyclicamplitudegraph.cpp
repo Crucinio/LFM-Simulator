@@ -67,18 +67,11 @@ CyclicAmplitudeGraph::CyclicAmplitudeGraph(QWidget *parent, const QVector<QPoint
         points_x.emplaceBack(point.x());
         points_y.emplaceBack(point.y());
     }
-
-    current_starting_point = 0;
 }
 
 QSizeF CyclicAmplitudeGraph::get_padding() const
 {
     return padding;
-}
-
-int CyclicAmplitudeGraph::get_current_frame() const
-{
-    return current_starting_point;
 }
 
 void CyclicAmplitudeGraph::set_text_x(QString &text)
@@ -102,21 +95,15 @@ void CyclicAmplitudeGraph::update_points(QVector<QPointF> &new_points)
         points_x.emplaceBack(point.x());
         points_y.emplaceBack(point.y());
     }
-
-    current_starting_point = 0;
 }
 
 void CyclicAmplitudeGraph::advance_by(int frames)
 {
+    if (points_x.empty())
+        return;
+
     frames = frames % points_x.size();
     auto it = points_y.begin();
-    std::advance(it, points_x.size() - frames);
+    std::advance(it, frames);
     std::rotate(points_y.begin(), it, points_y.end());
-    current_starting_point += frames;
 }
-
-void CyclicAmplitudeGraph::set_current_starting_point(int index)
-{
-    current_starting_point = index % points.size();
-}
-

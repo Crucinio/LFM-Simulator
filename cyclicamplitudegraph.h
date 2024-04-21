@@ -32,10 +32,10 @@ private:
 
     // vector of points
     QVector<QPointF> points = QVector<QPointF>();
-    // gor easier advancing
+
+    // for easier advancing
     QVector<float> points_x;
     QVector<float> points_y;
-    int current_starting_point = 0;
 
     // screening
     QRect text_boundig_rect = {0, 0, 5, 13};
@@ -48,7 +48,6 @@ public:
     CyclicAmplitudeGraph(QWidget *parent, const QVector<QPointF> &_points);
 
     QSizeF get_padding() const;
-    int get_current_frame() const;
 
     void set_text_x(QString& text);
     void set_text_y(QString& text);
@@ -58,7 +57,6 @@ public:
     static constexpr QSizeF world_size = { 800.0f, 600.0f };
 public slots:
     void advance_by(int frames);
-    void set_current_starting_point(int index);
 };
 
 #endif // CYCLICAMPLITUDEGRAPH_H

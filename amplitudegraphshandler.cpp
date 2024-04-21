@@ -5,6 +5,9 @@
 #include <mutex>
 #include <thread>
 #include <windows.h>
+#include <math.h>
+
+# define PI 3.14159265358979323846
 
 std::mutex points_mutex;
 
@@ -13,14 +16,19 @@ AmplitudeGraphsHandler::AmplitudeGraphsHandler(QWidget *parent)
 {
     lfm_graph = new CyclicAmplitudeGraph(this);
     df_graph = new CyclicAmplitudeGraph(this);
-
+    frame_slider = new QSlider(Qt::Horizontal, this);
+    frame_slider->setSingleStep(1);
+    frame_slider->setMinimum(0);
+    frame_slider->setMaximum(0);
 
     main_layout.addWidget(lfm_graph);
     main_layout.addWidget(df_graph);
+    main_layout.addWidget(frame_slider);
 
     setLayout(&main_layout);
 
     connect(this, &AmplitudeGraphsHandler::need_update, this, &AmplitudeGraphsHandler::update_graphics);
+    connect(frame_slider, &QSlider::valueChanged, this, &AmplitudeGraphsHandler::process_slider);
 }
 
 AmplitudeGraphsHandler::~AmplitudeGraphsHandler()
@@ -41,10 +49,13 @@ void AmplitudeGraphsHandler::start()
     while (!is_paused){
         auto clock_end =  std::chrono::steady_clock::now();
         float elapsed = float(std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start).count());
-        int frames = elapsed / descreet_time + 1;
+        int frames = elapsed / descreet_time;
+        if (frames == 0)
+            frames = 1;
+
         points_mutex.lock();
         qDebug() << "Advanced by " << frames << " frames";
-        df_graph->advance_by(frames);
+        lfm_graph->advance_by(frames);
         points_mutex.unlock();
 
         Sleep(50);
@@ -56,28 +67,60 @@ void AmplitudeGraphsHandler::start()
 
 void AmplitudeGraphsHandler::reset(LFMSettings settings)
 {
+    // linear freq changes
     qDebug() << "settings data acquired";
     QVector<QPointF> points;
     descreet_time = settings.dt * 1000.0f; // ms
     float period = 1 / settings.mf;
     int size = (period / settings.dt) + 1;
-    float D = 0.4f * df_graph->world_size.height();
+    float D = 0.4f;
     float x0 = df_graph->get_padding().width();
-    float y0 = 2.0f * D + df_graph->get_padding().height();
-    float dx = df_graph->world_size.width() * 0.9 / (size + 1);
-    float dy = 2.0f * D / (size + 1);
+    float y0 = 2.0f * D * df_graph->world_size.height() + 1 * df_graph->get_padding().height();
+    float dx = 0.9 / (size);
+    float dy = 2.0f * D / (size);
 
 
+    points.reserve(size + 1);
     for (int i = 0; i < size + 1; ++i)
     {
-        points.emplaceBack(x0 + dx * i, y0 - dy * i);
+        points.emplaceBack(x0 + (dx * i) * df_graph->world_size.width(), y0 - (dy * i) * df_graph->world_size.height());
     }
 
     df_graph->update_points(points);
-    df_graph->advance_by(points.size() / 2);
     df_graph->update();
+
+    // LFM
+    // начальная фаза - 0
+    points.clear();
+    for (int i = 0; i < size + 1; ++i)
+    {
+        float x = dx * i;
+        float y = cos(PI / 2.0f + 2.0f * PI * (settings.cf * x + (D * 2.0f / period) * x * x));
+        points.emplaceBack(x0 + x * df_graph->world_size.width(), (y0 + df_graph->get_padding().height()) / 2.0f + y * df_graph->world_size.height() * 0.4f);
+    }
+
+    lfm_graph->update_points(points);
+    lfm_graph->update();
+
+    frame_slider->setMaximum(size + 1);
+    frame_slider->setValue(0);
 
     std::thread t(&AmplitudeGraphsHandler::start, this);
     t.detach();
+}
+
+void AmplitudeGraphsHandler::process_slider(int val)
+{
+    int diff = (val - frame_value);
+    if (diff < 0)
+        diff = frame_slider->maximum() + diff;
+
+    frame_value = val;
+    points_mutex.lock();
+    df_graph->advance_by(diff);
+    df_graph->update();
+    lfm_graph->advance_by(diff);
+    lfm_graph->update();
+    points_mutex.unlock();
 }
 
