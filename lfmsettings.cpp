@@ -2,11 +2,11 @@
 #include "lfmsettings.h"
 
 LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
-    : QWidget{parent}
+    : QWidget(parent)
 {
     // styling
-    setMinimumSize(min_size);
     main_layout.setSpacing(settings_padding_y);
+    main_layout.setAlignment(Qt::AlignTop);
 
     // labels
     main_layout.addWidget(&settings_label);
@@ -16,6 +16,12 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     labels_layout.addWidget(&dt_label);
 
     // line edits
+    QLocale locale("en_US");
+    mf_validator.setLocale(locale);
+    cf_validator.setLocale(locale);
+    df_validator.setLocale(locale);
+    dt_validator.setLocale(locale);
+
     mf_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
     cf_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
     df_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
@@ -44,7 +50,7 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
 
     // signal - slot system
     connect(&reset_button, &QPushButton::clicked, this, &LFMSettingsWidget::process_reset);
-    connect(&pause_button, &QPushButton::clicked, this, &LFMSettingsWidget::switch_pause_state);
+    connect(&pause_button, &QPushButton::clicked, this, &LFMSettingsWidget::process_pause);
 }
 
 void LFMSettingsWidget::process_reset()
@@ -53,4 +59,11 @@ void LFMSettingsWidget::process_reset()
                           cf_line_edit.text().toDouble(),
                           df_line_edit.text().toDouble(),
                           dt_line_edit.text().toDouble()});
+}
+
+void LFMSettingsWidget::process_pause()
+{
+    paused ? pause_button.setText("PAUSE") : pause_button.setText("CONTINUE");
+    paused = !paused;
+    emit switch_pause_state();
 }

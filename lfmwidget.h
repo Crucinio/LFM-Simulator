@@ -3,6 +3,7 @@
 #define LFMWIDGET_H
 
 #include "lfmsettings.h"
+#include "amplitudegraphshandler.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -17,6 +18,11 @@ class LFMWidget : public QWidget
 private:
     // SettingsWidget
     LFMSettingsWidget* settings_widget;
+
+    // Graphs
+    AmplitudeGraphsHandler graphs = AmplitudeGraphsHandler(this);
+
+    QHBoxLayout main_layout;
 public:
     LFMWidget(QWidget *parent = nullptr);
     ~LFMWidget();
