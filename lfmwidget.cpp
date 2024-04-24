@@ -22,7 +22,7 @@ LFMWidget::LFMWidget(QWidget *parent)
     setLayout(&main_layout);
 
     // signal-slot
-    connect(settings_widget, &LFMSettingsWidget::reset_requested, &graphs, &AmplitudeGraphsHandler::reset);
+    connect(settings_widget, &LFMSettingsWidget::new_data_sent, &graphs, &AmplitudeGraphsHandler::reset);
 }
 
 LFMWidget::~LFMWidget()

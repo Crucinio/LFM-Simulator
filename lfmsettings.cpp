@@ -1,64 +1,180 @@
 
 #include "lfmsettings.h"
 
+#include <QMessageBox>
+
 LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     : QWidget(parent)
 {
+    main_layout = new QVBoxLayout(this);
     // styling
-    main_layout.setSpacing(settings_padding_y);
-    main_layout.setAlignment(Qt::AlignTop);
+    main_layout->setSpacing(settings_padding_y);
+    main_layout->setAlignment(Qt::AlignTop);
 
+
+    // EXPLANATION
+    explanation_label = new QLabel("Explanation of terms", this);
+    mf_explanation_label = new QLabel("MF - Modifying Frequency", this);
+    cf_explanation_label = new QLabel("CF - Carrier Frequensy", this);
+    fd_explanation_label = new QLabel("FD - Frequency Deviation", this);
+    sf_explanation_label = new QLabel("ST = Sampling Frequency", this);
+
+    main_layout->addWidget(explanation_label);
+    main_layout->addWidget(mf_explanation_label);
+    main_layout->addWidget(cf_explanation_label);
+    main_layout->addWidget(fd_explanation_label);
+    main_layout->addWidget(sf_explanation_label);
+    // EXPLANATION END
+
+    main_layout->addSpacing(10);
+
+    // CONSTRAINTS
+    constraint_label = new QLabel("Constraints", this);
+    constraint_mf_label = new QLabel(QString::number(LFMSettings::mf_min) + " < MF < " + QString::number(LFMSettings::mf_max), this);
+    constraint_cf_label = new QLabel("CF = MF * 10", this);
+    constraint_fd_label = new QLabel(QString::number(LFMSettings::fd_min) + " < FD < MF", this);
+    constraint_sf_label = new QLabel("(CF + FD) * 100 < SF < 1MHz", this);
+
+    main_layout->addWidget(constraint_label);
+    main_layout->addWidget(constraint_mf_label);
+    main_layout->addWidget(constraint_cf_label);
+    main_layout->addWidget(constraint_fd_label);
+    main_layout->addWidget(constraint_sf_label);
+    // CONSTRAINTS END
+
+    main_layout->addSpacing(10);
+
+    // INPUT
+    input_layout = new QHBoxLayout(this);
     // labels
-    main_layout.addWidget(&settings_label);
-    labels_layout.addWidget(&mf_label);
-    labels_layout.addWidget(&df_label);
-    labels_layout.addWidget(&dt_label);
+    input_labels_layout = new QVBoxLayout(this);
+    settings_label = new QLabel("Settings", this);
+    mf_label = new QLabel("MF, Hz", this);
+    fd_label = new QLabel("FD, Hz", this);
+    sf_label = new QLabel("SF, Hz", this);
+
+    main_layout->addWidget(settings_label);
+    input_labels_layout->addWidget(mf_label);
+    input_labels_layout->addWidget(fd_label);
+    input_labels_layout->addWidget(sf_label);
 
     // line edits
+    input_edits_layout = new QVBoxLayout(this);
+    mf_line_edit = new QLineEdit("1", this);
+    fd_line_edit = new QLineEdit("0", this);
+    sf_line_edit = new QLineEdit("100", this);
+
+    mf_validator = new QDoubleValidator(LFMSettings::mf_min, LFMSettings::mf_max, LFMSettings::precision, this);
+    fd_validator = new QDoubleValidator(LFMSettings::fd_min, LFMSettings::fd_max, LFMSettings::precision, this);
+    sf_validator = new QDoubleValidator(LFMSettings::sf_min, LFMSettings::sf_max, LFMSettings::precision, this);
+
     QLocale locale("en_US");
-    mf_validator.setLocale(locale);
-    df_validator.setLocale(locale);
-    dt_validator.setLocale(locale);
+    mf_validator->setLocale(locale);
+    fd_validator->setLocale(locale);
+    sf_validator->setLocale(locale);
 
-    mf_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
-    df_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
-    dt_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
+    mf_validator->setNotation(QDoubleValidator::Notation::StandardNotation);
+    fd_validator->setNotation(QDoubleValidator::Notation::StandardNotation);
+    sf_validator->setNotation(QDoubleValidator::Notation::StandardNotation);
 
-    mf_line_edit.setValidator(&mf_validator);
-    df_line_edit.setValidator(&df_validator);
-    dt_line_edit.setValidator(&dt_validator);
+    mf_line_edit->setValidator(mf_validator);
+    fd_line_edit->setValidator(fd_validator);
+    sf_line_edit->setValidator(sf_validator);
+    
+    input_edits_layout->addWidget(mf_line_edit);
+    input_edits_layout->addWidget(fd_line_edit);
+    input_edits_layout->addWidget(sf_line_edit);
 
-    edits_layout.addWidget(&mf_line_edit);
-    edits_layout.addWidget(&df_line_edit);
-    edits_layout.addWidget(&dt_line_edit);
 
-    // buttons
-    buttons_layout.addWidget(&reset_button);
-    buttons_layout.addWidget(&pause_button);
+    input_layout->addLayout(input_labels_layout);
+    input_layout->addLayout(input_edits_layout);
+    main_layout->addLayout(input_layout);
+    // INPUT END
 
-    // layouts
-    input_layout.addLayout(&labels_layout);
-    input_layout.addLayout(&edits_layout);
-    main_layout.addLayout(&input_layout);
-    main_layout.addLayout(&buttons_layout);
-    setLayout(&main_layout);
+    main_layout->addSpacing(10);
 
-    // signal - slot system
+    // CURRENT DATA
+    last_data_label = new QLabel("Last input");
+    last_mf_label =new QLabel("Last MF = 0.0");
+    last_cf_label = new QLabel("Last CF = 0.0");
+    last_fd_label = new QLabel("Last FD = 0.0");
+    last_sf_label = new QLabel("Last SF = 0.0");
+
+    main_layout->addWidget(last_data_label);
+    main_layout->addWidget(last_mf_label);
+    main_layout->addWidget(last_cf_label);
+    main_layout->addWidget(last_fd_label);
+    main_layout->addWidget(last_sf_label);
+    // CURRENT DATA END
+
+    main_layout->addWidget(&reset_button);
+
+    setLayout(main_layout);
+
+
+    // signals
     connect(&reset_button, &QPushButton::clicked, this, &LFMSettingsWidget::process_reset);
-    connect(&pause_button, &QPushButton::clicked, this, &LFMSettingsWidget::process_pause);
+}
+
+LFMSettings LFMSettingsWidget::check_settings(bool& ok)
+{
+    ok = false;
+
+    LFMSettings settings;
+
+    // MF checks
+    settings.mf = mf_line_edit->text().toDouble();
+    if (settings.mf == 0 || settings.mf < LFMSettings::mf_min || settings.mf > LFMSettings::mf_max)
+    {
+        notify_input_invalid("Modifying frequency is invalid. Check constraints for better info.", "!MF INVALID INPUT!");
+        return settings;
+    }
+
+    settings.cf = mf_line_edit->text().toDouble() * 10;
+
+    // FD checks
+    settings.fd = fd_line_edit->text().toDouble();
+    if (settings.fd > settings.cf)
+    {
+        notify_input_invalid("Deviation Frequency cannot be higher than Carrier Frequency!", "!FD INVALID INPUT!");
+        return settings;
+    }
+
+    // SF checks
+    settings.sf = sf_line_edit->text().toDouble();
+    if (settings.sf < (settings.fd + settings.cf) * 100)
+    {
+        notify_input_invalid("Sampling Frequency should be higher!", "!SF INVALID INPUT!");
+        return settings;
+    }
+
+    ok = true;
+    return settings;
+}
+
+void LFMSettingsWidget::notify_input_invalid(QString msg_text, QString title)
+{
+    QMessageBox* msg = new QMessageBox();
+    connect(msg, &QMessageBox::buttonClicked, msg, &QObject::deleteLater);
+    msg->setWindowTitle(title);
+    msg->setText(msg_text);
+    msg->exec();
 }
 
 void LFMSettingsWidget::process_reset()
 {
-    emit reset_requested({mf_line_edit.text().toDouble(),
-                          mf_line_edit.text().toDouble() * 10,
-                          df_line_edit.text().toDouble(),
-                          dt_line_edit.text().toDouble()});
-}
+    bool valid = false;
+    LFMSettings new_settings = check_settings(valid);
+    if (!valid)
+        return;
 
-void LFMSettingsWidget::process_pause()
-{
-    paused ? pause_button.setText("PAUSE") : pause_button.setText("CONTINUE");
-    paused = !paused;
-    emit switch_pause_state();
+    new_settings.sf = 1 / new_settings.sf;
+    // updating the "last data" section
+    last_mf_label->setText("Last MF = " + mf_line_edit->text());
+    last_cf_label->setText("Last CF = " + QString::number(mf_line_edit->text().toDouble() * 10));
+    last_fd_label->setText("Last FD = " + fd_line_edit->text());
+    last_sf_label->setText("Last SF = " + sf_line_edit->text());
+
+    //sending new settings
+    emit new_data_sent(new_settings);
 }

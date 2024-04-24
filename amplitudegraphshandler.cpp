@@ -70,12 +70,12 @@ void AmplitudeGraphsHandler::reset(LFMSettings settings)
     // linear freq changes
     qDebug() << "settings data acquired";
     QVector<QPointF> points;
-    descreet_time = settings.dt * 1000.0f; // ms
+    descreet_time = settings.sf * 1000.0f; // ms
     // for calc
     double period = 1.0f / settings.mf;
-    int size = (period / settings.dt) + 1;
-    double D = settings.df;
-    double dt = settings.dt;
+    int size = (period / settings.sf) + 1;
+    double D = settings.fd;
+    double dt = settings.sf;
 
 
     // saw, doesn't matter what exactly, only for impression of a growing freq of carrying wave
