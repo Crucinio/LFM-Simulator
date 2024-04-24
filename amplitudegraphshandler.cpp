@@ -45,24 +45,24 @@ void AmplitudeGraphsHandler::update_graphics()
 // is it safe? I bet it is not!
 void AmplitudeGraphsHandler::start()
 {
-    auto clock_start = std::chrono::steady_clock::now();
-    while (!is_paused){
-        auto clock_end =  std::chrono::steady_clock::now();
-        float elapsed = float(std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start).count());
-        int frames = elapsed / descreet_time;
-        if (frames == 0)
-            frames = 1;
+//    auto clock_start = std::chrono::steady_clock::now();
+//    while (!is_paused){
+//        auto clock_end =  std::chrono::steady_clock::now();
+//        float elapsed = float(std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start).count());
+//        int frames = elapsed / descreet_time;
+//        if (frames == 0)
+//            frames = 1;
 
-        points_mutex.lock();
-        qDebug() << "Advanced by " << frames << " frames";
-        lfm_graph->advance_by(frames);
-        points_mutex.unlock();
+//        points_mutex.lock();
+//        qDebug() << "Advanced by " << frames << " frames";
+//        // lfm_graph->advance_by(frames);
+//        points_mutex.unlock();
 
-        Sleep(50);
-        clock_start = std::chrono::steady_clock::now();
+//        Sleep(50);
+//        clock_start = std::chrono::steady_clock::now();
 
-        emit need_update();
-    }
+//        emit need_update();
+//    }
 }
 
 void AmplitudeGraphsHandler::reset(LFMSettings settings)
@@ -71,19 +71,23 @@ void AmplitudeGraphsHandler::reset(LFMSettings settings)
     qDebug() << "settings data acquired";
     QVector<QPointF> points;
     descreet_time = settings.dt * 1000.0f; // ms
-    float period = 1 / settings.mf;
+    // for calc
+    double period = 1.0f / settings.mf;
     int size = (period / settings.dt) + 1;
-    float D = 0.4f;
-    float x0 = df_graph->get_padding().width();
-    float y0 = 2.0f * D * df_graph->world_size.height() + 1 * df_graph->get_padding().height();
-    float dx = 0.9 / (size);
-    float dy = 2.0f * D / (size);
+    double D = settings.df;
+    double dt = settings.dt;
 
 
-    points.reserve(size + 1);
-    for (int i = 0; i < size + 1; ++i)
+    // saw, doesn't matter what exactly, only for impression of a growing freq of carrying wave
+    // has to have the same amount of points for better sliding
+    double dy = 0.8 * df_graph->world_size.height() / size;
+    points.reserve(size);
+    for (int i = 0; i < size; ++i)
     {
-        points.emplaceBack(x0 + (dx * i) * df_graph->world_size.width(), y0 - (dy * i) * df_graph->world_size.height());
+        double x = dt * i * settings.mf;
+        double y = dy * i;
+        points.emplaceBack(df_graph->get_padding().width() + x * df_graph->world_size.width() * (1 - (2.0f * df_graph->get_padding().width() / df_graph->world_size.width())),
+                           df_graph->world_size.height() * (1 - (lfm_graph->get_padding().height() / lfm_graph->world_size.height())) - y);
     }
 
     df_graph->update_points(points);
@@ -92,11 +96,16 @@ void AmplitudeGraphsHandler::reset(LFMSettings settings)
     // LFM
     // начальная фаза - 0
     points.clear();
-    for (int i = 0; i < size + 1; ++i)
+    for (int i = 0; i < size; ++i)
     {
-        float x = dx * i;
-        float y = cos(PI / 2.0f + 2.0f * PI * (settings.cf * x + (D * 2.0f / period) * x * x));
-        points.emplaceBack(x0 + x * df_graph->world_size.width(), (y0 + df_graph->get_padding().height()) / 2.0f + y * df_graph->world_size.height() * 0.4f);
+        double x = dt * i * settings.mf;
+        double x_world = lfm_graph->get_padding().width() + x * lfm_graph->world_size.width() * (1 - (2.0f * lfm_graph->get_padding().width() / lfm_graph->world_size.width()));
+        double y = cos(PI / 2.0f + 2.0f * PI * (settings.cf * x + (D * 2.0f / period) * x * x));
+        double y_world = lfm_graph->world_size.height() / 2.0f + y * lfm_graph->world_size.height() * (1 - (2.0f * lfm_graph->get_padding().height() / lfm_graph->world_size.height())) / 2.0f;
+        if (x_world > lfm_graph->world_size.width() - lfm_graph->get_padding().width())
+            break;
+
+        points.emplace_back(x_world, y_world);
     }
 
     lfm_graph->update_points(points);

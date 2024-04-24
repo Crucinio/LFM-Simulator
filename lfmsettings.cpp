@@ -11,29 +11,24 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     // labels
     main_layout.addWidget(&settings_label);
     labels_layout.addWidget(&mf_label);
-    labels_layout.addWidget(&cf_label);
     labels_layout.addWidget(&df_label);
     labels_layout.addWidget(&dt_label);
 
     // line edits
     QLocale locale("en_US");
     mf_validator.setLocale(locale);
-    cf_validator.setLocale(locale);
     df_validator.setLocale(locale);
     dt_validator.setLocale(locale);
 
     mf_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
-    cf_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
     df_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
     dt_validator.setNotation(QDoubleValidator::Notation::StandardNotation);
 
     mf_line_edit.setValidator(&mf_validator);
-    cf_line_edit.setValidator(&cf_validator);
     df_line_edit.setValidator(&df_validator);
     dt_line_edit.setValidator(&dt_validator);
 
     edits_layout.addWidget(&mf_line_edit);
-    edits_layout.addWidget(&cf_line_edit);
     edits_layout.addWidget(&df_line_edit);
     edits_layout.addWidget(&dt_line_edit);
 
@@ -56,7 +51,7 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
 void LFMSettingsWidget::process_reset()
 {
     emit reset_requested({mf_line_edit.text().toDouble(),
-                          cf_line_edit.text().toDouble(),
+                          mf_line_edit.text().toDouble() * 10,
                           df_line_edit.text().toDouble(),
                           dt_line_edit.text().toDouble()});
 }
