@@ -17,7 +17,7 @@ struct LFMSettings
 {
     static constexpr int precision = 10;
 
-    // modifying frequency
+    // Modulating frequency
     static constexpr double mf_min = 0.1;
     static constexpr double mf_max = 100;
     double mf = 1;
@@ -36,6 +36,13 @@ struct LFMSettings
     static constexpr double sf_min = 100;
     static constexpr double sf_max = 10000000;
     double sf = 100;;
+
+    // relative constraints
+    static constexpr double cf_to_mf_min = 5;
+    static constexpr double cf_to_mf_max = 1000;
+
+    static constexpr double sf_to_cf_x_fd_min = 100;
+    static constexpr double sf_to_mf_max = 10000000;
 };
 
 // UI class for data input
@@ -73,11 +80,13 @@ private:
     // labels
     QLabel* settings_label;
     QLabel* mf_label;
+    QLabel* cf_label;
     QLabel* fd_label;
     QLabel* sf_label;
 
     // line edits
     QLineEdit* mf_line_edit;
+    QLineEdit* cf_line_edit;
     QLineEdit* fd_line_edit;
     QLineEdit* sf_line_edit;
     // INPUT END
@@ -92,6 +101,7 @@ private:
 
     // input chats validators, could have used regex validator, but this one should be as fine
     QDoubleValidator* mf_validator;
+    QDoubleValidator* cf_validator;
     QDoubleValidator* fd_validator;
     QDoubleValidator* sf_validator;
 

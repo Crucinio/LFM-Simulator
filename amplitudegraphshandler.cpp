@@ -16,7 +16,42 @@ void GraphHandler::fill_points_time_domain(QVector<QPointF> &points, double peri
     {
         double t = dt * i;
         double y = cos(PI / 2.0f + 2.0f * PI * ((carrier_frequency - deviation) * t + deviation * t * ( t / period)));
-        points.emplace_back(i / samples_number, y);
+        points.emplace_back(float(i) / samples_number, y);
+    }
+}
+
+double GraphHandler::calculate_imaginary_part(const QVector<QPointF> &time_domain_points, int k)
+{
+    double S = 0;
+    for (int n = 0; n < time_domain_points.size(); ++n)
+    {
+        S += time_domain_points[n].y() * sin((2.0f * PI * k * n) / time_domain_points.size());
+    }
+
+    return -S;
+}
+
+double GraphHandler::calculate_real_part(const QVector<QPointF> &time_domain_points, int k)
+{
+    double S = 0;
+    for (int n = 0; n < time_domain_points.size(); ++n)
+    {
+        S += time_domain_points[n].y() * cos((2.0f * PI * k * n) / time_domain_points.size());
+    }
+
+    return S;
+}
+
+void GraphHandler::fill_points_frequency_domain(QVector<QPointF> &points_container, const QVector<QPointF> &time_domain_points)
+{
+    points_container.clear();
+    points_container.reserve(time_domain_points.size());
+    for (int k = 0; k < time_domain_points.size(); ++k)
+    {
+        double imaginary = calculate_imaginary_part(time_domain_points, k);
+        double real = calculate_real_part(time_domain_points, k);
+        double R = sqrtf(real * real + imaginary * imaginary);
+        points_container.emplace_back(time_domain_points[k].x(), -R);
     }
 }
 
@@ -32,6 +67,8 @@ GraphHandler::GraphHandler(QWidget *parent) : QTabWidget{parent}
 
     // initialisation of lfm graph in frequency domain
     lfm_frequency_graph = new Graph(this);
+    lfm_frequency_graph->set_starting_point({40, lfm_frequency_graph->get_world_size().height() - 30});
+    lfm_frequency_graph->set_amplitude(520);
     lfm_frequency_graph->set_argument_text("f, Hz");
     lfm_frequency_graph->set_value_text("s(w)");
 
@@ -46,13 +83,14 @@ GraphHandler::~GraphHandler()
 
 void GraphHandler::reset(LFMSettings settings)
 {
-    QVector<QPointF> points;
-    lfm_time_graph->set_x_multiplier(settings.mf);
-    fill_points_time_domain(points, 1 / settings.mf, settings.sf, settings.cf, settings.fd);
+    QVector<QPointF> lfm_points;
+    fill_points_time_domain(lfm_points, 1 / settings.mf, settings.sf, settings.cf, settings.fd);
+    lfm_time_graph->update_points(lfm_points);
 
-    lfm_time_graph->update_points(points);
+    QVector<QPointF> freq_points;
+    fill_points_frequency_domain(freq_points, lfm_points);
+    lfm_frequency_graph->update_points(freq_points);
+
     lfm_time_graph->update();
-
-//    frame_slider->setMaximum(size + 1);
-//    frame_slider->setValue(0);
+    lfm_frequency_graph->update();
 }

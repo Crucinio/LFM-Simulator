@@ -49,6 +49,10 @@ public:
     Graph(QWidget *parent = nullptr);
     Graph(QWidget *parent, const QVector<QPointF> &_points);
 
+    QSizeF get_world_size();
+
+    void set_starting_point(QPointF start);
+
     void set_argument_text(QString text);
     void set_value_text(QString text);
     void set_amplitude_text(QString text);

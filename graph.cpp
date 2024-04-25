@@ -79,6 +79,16 @@ Graph::Graph(QWidget *parent, const QVector<QPointF> &_points) : Graph(parent)
     points = _points;
 }
 
+QSizeF Graph::get_world_size()
+{
+    return world_size;
+}
+
+void Graph::set_starting_point(QPointF start)
+{
+    starting_point = start;
+}
+
 void Graph::set_argument_text(QString text)
 {
     argument_text = text;
