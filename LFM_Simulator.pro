@@ -10,14 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     amplitudegraphshandler.cpp \
-    cyclicamplitudegraph.cpp \
+    graph.cpp \
     lfmsettings.cpp \
     main.cpp \
     lfmwidget.cpp
 
 HEADERS += \
     amplitudegraphshandler.h \
-    cyclicamplitudegraph.h \
+    graph.h \
     lfmsettings.h \
     lfmwidget.h
 

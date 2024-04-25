@@ -20,7 +20,7 @@ private:
     LFMSettingsWidget* settings_widget;
 
     // Graphs
-    AmplitudeGraphsHandler graphs = AmplitudeGraphsHandler(this);
+    GraphHandler graphs = GraphHandler(this);
 
     QHBoxLayout main_layout;
 public:

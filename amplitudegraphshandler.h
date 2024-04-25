@@ -2,40 +2,28 @@
 #ifndef AMPLITUDEGRAPHSHANDLER_H
 #define AMPLITUDEGRAPHSHANDLER_H
 
-#include "cyclicamplitudegraph.h"
+#include "graph.h"
 #include "lfmsettings.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QSlider>
+#include <QTabWidget>
 
 
-class AmplitudeGraphsHandler : public QWidget
+class GraphHandler : public QTabWidget
 {
     Q_OBJECT
 private:
-    QVBoxLayout main_layout;
+    Graph* lfm_time_graph;
+    Graph* lfm_frequency_graph;
 
-    CyclicAmplitudeGraph* lfm_graph;
-    CyclicAmplitudeGraph* df_graph;
-
-    QSlider* frame_slider;
-
-    bool is_paused = false;
-    float descreet_time = 0.01f;
-    int frame_value = 0;
+    void fill_points_time_domain(QVector<QPointF>& points, double period, double sampling_frequency,double carrier_frequency, double deviation);
 public:
-    AmplitudeGraphsHandler(QWidget *parent = nullptr);
-    ~AmplitudeGraphsHandler();
-
-private slots:
-    void update_graphics();
-signals:
-    void need_update();
+    GraphHandler(QWidget *parent = nullptr);
+    ~GraphHandler();
 public slots:
-    void start();
     void reset(LFMSettings settings);
-    void process_slider(int val);
+    // void process_slider(int val);
 };
 
 #endif // AMPLITUDEGRAPHSHANDLER_H

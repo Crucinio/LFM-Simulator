@@ -168,7 +168,6 @@ void LFMSettingsWidget::process_reset()
     if (!valid)
         return;
 
-    new_settings.sf = 1 / new_settings.sf;
     // updating the "last data" section
     last_mf_label->setText("Last MF = " + mf_line_edit->text());
     last_cf_label->setText("Last CF = " + QString::number(mf_line_edit->text().toDouble() * 10));
