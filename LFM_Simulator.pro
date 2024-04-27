@@ -9,15 +9,15 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    amplitudegraphshandler.cpp \
     graph.cpp \
+    graphhandler.cpp \
     lfmsettings.cpp \
     main.cpp \
     lfmwidget.cpp
 
 HEADERS += \
-    amplitudegraphshandler.h \
     graph.h \
+    graphhandler.h \
     lfmsettings.h \
     lfmwidget.h
 

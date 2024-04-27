@@ -23,10 +23,14 @@ void Graph::paintEvent(QPaintEvent *event)
     double y0 = starting_point.y() * world_to_screen.y();
     // Ox
     painter.drawLine(0, y0, size().width(), y0);
+    painter.drawLine(size().width(), y0, size().width() - horizontal_arrow.width(), y0 - horizontal_arrow.height());
+    painter.drawLine(size().width(), y0, size().width() - horizontal_arrow.width(), y0 + horizontal_arrow.height());
     painter.drawText(width() - fmf.horizontalAdvance(argument_text), y0 - text_size / 2, argument_text);
 
     // Oy
     painter.drawLine(x0, 0, x0, height());
+    painter.drawLine(x0, 0, x0 + vertical_arrow.width(), vertical_arrow.height());
+    painter.drawLine(x0, 0, x0 - vertical_arrow.width(), vertical_arrow.height());
     painter.drawText(x0 + fmf.horizontalAdvance('1'), fmf.height() / 1.5f,  value_text);
 
     // Amplitude (OPTIONAL)
@@ -35,33 +39,53 @@ void Graph::paintEvent(QPaintEvent *event)
         pen.setStyle(Qt::DashLine);
         painter.setPen(pen);
         // -
-        painter.drawLine(x0, y0 + amplitude_y * world_to_screen.y(), width(), y0 + amplitude_y * world_to_screen.y());
+        painter.drawLine(0, y0 + amplitude_y * world_to_screen.y(), width(), y0 + amplitude_y * world_to_screen.y());
         painter.drawText(x0 + fmf.horizontalAdvance('1'), y0 + amplitude_y * world_to_screen.y(), "-" + amplitude_text);
 
         // +
-        painter.drawLine(x0, y0 - amplitude_y * world_to_screen.y(), width(), y0 - amplitude_y * world_to_screen.y());
+        painter.drawLine(0, y0 - amplitude_y * world_to_screen.y(), width(), y0 - amplitude_y * world_to_screen.y());
         painter.drawText(x0 + fmf.horizontalAdvance('1'), y0 - amplitude_y * world_to_screen.y(), amplitude_text);
     }
+
+    double dx = 0;
+    if (!points.empty())
+        dx = (graph_size.width() / points.size()) * world_to_screen.x();
 
     // Graph
     pen.setColor(graph_color);
     pen.setStyle(Qt::SolidLine);
     painter.setPen(pen);
-    double dx = 0;
-    if (!points.empty())
-        dx = (1.0f / points.size()) * (width() - 2 * x0);
+
 
     for (int i = 0; i < points.size() - 1; ++i)
     {
-        painter.drawLine(x0 + dx * i,
-                         y0 + points[i].y() * (height() / 2 - 50 * world_to_screen.y()),
-                         x0 + dx * i,
-                         y0 +  points[i + 1].y() * (height() / 2 - 50 * world_to_screen.y()));
+        painter.drawLine(x0 + dx * points[i].x(),
+                         y0 - points[i].y() * graph_size.height() * world_to_screen.y(),
+                         x0 + dx * points[i + 1].x(),
+                         y0 - points[i + 1].y() * graph_size.height() * world_to_screen.y());
     }
-    painter.end();
 
+    pen.setColor(axis_color);
+    pen.setStyle(Qt::DashLine);
+    painter.setPen(pen);
+
+    // Special marks x
+    for (auto& mark : special_marks_x)
+    {
+        painter.drawLine(points[mark.first].x() * dx + x0, 0, points[mark.first].x() * dx + x0, height());
+        painter.drawText(points[mark.first].x() * dx + x0, y0 + fmf.height() / 1.5f, mark.second);
+    }
+
+    // Special marks y
+    for (auto& mark : special_marks_y)
+    {
+        painter.drawLine(0, y0 - mark.first * height(), width(), y0 - mark.first * height());
+        painter.drawText(x0, y0 - mark.first * height(), mark.second);
+    }
+
+    painter.end();
     // copying to Widget canvas
-    //frame = frame.scaled()
+    // frame = frame.scaled()
     painter.begin(this);
     painter.drawPixmap(0, 0, frame);
     painter.end();
@@ -89,6 +113,11 @@ void Graph::set_starting_point(QPointF start)
     starting_point = start;
 }
 
+void Graph::set_graph_size(QSizeF size)
+{
+    graph_size = size;
+}
+
 void Graph::set_argument_text(QString text)
 {
     argument_text = text;
@@ -104,14 +133,19 @@ void Graph::set_amplitude_text(QString text)
     amplitude_text = text;
 }
 
+void Graph::set_special_marks_x(QVector<std::pair<int, QString> > &new_marks)
+{
+    special_marks_x = new_marks;
+}
+
+void Graph::set_special_marks_y(QVector<std::pair<double, QString> > &new_marks)
+{
+    special_marks_y = new_marks;
+}
+
 void Graph::set_amplitude(double amplitude)
 {
     amplitude_y = amplitude;
-}
-
-void Graph::set_x_multiplier(double mult)
-{
-    x_multiplier = mult;
 }
 
 void Graph::update_points(QVector<QPointF> &new_points)

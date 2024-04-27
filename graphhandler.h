@@ -1,6 +1,6 @@
 
-#ifndef AMPLITUDEGRAPHSHANDLER_H
-#define AMPLITUDEGRAPHSHANDLER_H
+#ifndef GRAPHHANDLER_H
+#define GRAPHHANDLER_H
 
 #include "graph.h"
 #include "lfmsettings.h"
@@ -20,9 +20,9 @@ private:
     void fill_points_time_domain(QVector<QPointF>& points, double period, double sampling_frequency,double carrier_frequency, double deviation);
 
     // DPF
+    void fill_points_frequency_domain(QVector<QPointF>& points_container, const QVector<QPointF>& time_domain_points, double boundary);
     double calculate_imaginary_part(const QVector<QPointF>& time_domain_points, int k);
     double calculate_real_part(const QVector<QPointF>& time_domain_points, int k);
-    void fill_points_frequency_domain(QVector<QPointF>& points_container, const QVector<QPointF>& time_domain_points);
 public:
     GraphHandler(QWidget *parent = nullptr);
     ~GraphHandler();
@@ -31,4 +31,4 @@ public slots:
     // void process_slider(int val);
 };
 
-#endif // AMPLITUDEGRAPHSHANDLER_H
+#endif // GRAPHHANDLER_H

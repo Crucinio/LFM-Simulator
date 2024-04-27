@@ -33,7 +33,7 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     constraint_mf_label = new QLabel(QString::number(LFMSettings::mf_min) + " < MF < " + QString::number(LFMSettings::mf_max), this);
     constraint_cf_label = new QLabel("1000 > CF > MF", this);
     constraint_fd_label = new QLabel(QString::number(LFMSettings::fd_min) + " < FD < MF", this);
-    constraint_sf_label = new QLabel("(CF + FD) * 100 < SF < 1MHz", this);
+    constraint_sf_label = new QLabel("(CF + FD) * 100 < SF; SF / MF < " + QString::number(LFMSettings::sf_to_mf_max), this);
 
     main_layout->addWidget(constraint_label);
     main_layout->addWidget(constraint_mf_label);

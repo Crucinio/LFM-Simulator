@@ -42,7 +42,7 @@ struct LFMSettings
     static constexpr double cf_to_mf_max = 1000;
 
     static constexpr double sf_to_cf_x_fd_min = 100;
-    static constexpr double sf_to_mf_max = 10000000;
+    static constexpr double sf_to_mf_max = 500000;
 };
 
 // UI class for data input
