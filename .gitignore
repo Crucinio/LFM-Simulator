@@ -1,6 +1,4 @@
-# This file is used to ignore files which are generated
-# ----------------------------------------------------------------------------
-LFM_Simulator.user
+LFM_Simulator.pro.user
 *~
 *.autosave
 *.a
