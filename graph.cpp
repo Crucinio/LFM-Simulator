@@ -2,6 +2,9 @@
 #include "graph.h"
 
 #include <QFontMetricsF>
+#include <QPixmap>
+#include <QPainter>
+
 void Graph::paintEvent(QPaintEvent *event)
 {
     // prep
@@ -21,11 +24,12 @@ void Graph::paintEvent(QPaintEvent *event)
     // Axises
     double x0 = starting_point.x() * world_to_screen.x();
     double y0 = starting_point.y() * world_to_screen.y();
+
     // Ox
     painter.drawLine(0, y0, size().width(), y0);
     painter.drawLine(size().width(), y0, size().width() - horizontal_arrow.width(), y0 - horizontal_arrow.height());
     painter.drawLine(size().width(), y0, size().width() - horizontal_arrow.width(), y0 + horizontal_arrow.height());
-    painter.drawText(width() - fmf.horizontalAdvance(argument_text), y0 - text_size / 2, argument_text);
+    painter.drawText(width() - fmf.horizontalAdvance(argument_text), y0 - fmf.height() / 2, argument_text);
 
     // Oy
     painter.drawLine(x0, 0, x0, height());
@@ -33,7 +37,7 @@ void Graph::paintEvent(QPaintEvent *event)
     painter.drawLine(x0, 0, x0 - vertical_arrow.width(), vertical_arrow.height());
     painter.drawText(x0 + fmf.horizontalAdvance('1'), fmf.height() / 1.5f,  value_text);
 
-    // Amplitude (OPTIONAL)
+    // Amplitude
     if (amplitude_y > 0)
     {
         pen.setStyle(Qt::DashLine);
@@ -84,8 +88,8 @@ void Graph::paintEvent(QPaintEvent *event)
     }
 
     painter.end();
+
     // copying to Widget canvas
-    // frame = frame.scaled()
     painter.begin(this);
     painter.drawPixmap(0, 0, frame);
     painter.end();
@@ -96,11 +100,6 @@ void Graph::paintEvent(QPaintEvent *event)
 Graph::Graph(QWidget *parent) : QWidget{parent}
 {
     setMinimumSize(400, 300);
-}
-
-Graph::Graph(QWidget *parent, const QVector<QPointF> &_points) : Graph(parent)
-{
-    points = _points;
 }
 
 QSizeF Graph::get_world_size()
@@ -133,12 +132,12 @@ void Graph::set_amplitude_text(QString text)
     amplitude_text = text;
 }
 
-void Graph::set_special_marks_x(QVector<std::pair<int, QString> > &new_marks)
+void Graph::set_special_marks_x(const QVector<std::pair<int, QString> > &new_marks)
 {
     special_marks_x = new_marks;
 }
 
-void Graph::set_special_marks_y(QVector<std::pair<double, QString> > &new_marks)
+void Graph::set_special_marks_y(const QVector<std::pair<double, QString> > &new_marks)
 {
     special_marks_y = new_marks;
 }
@@ -148,7 +147,7 @@ void Graph::set_amplitude(double amplitude)
     amplitude_y = amplitude;
 }
 
-void Graph::update_points(QVector<QPointF> &new_points)
+void Graph::update_points(const QVector<QPointF> &new_points)
 {
     points = new_points;
 }

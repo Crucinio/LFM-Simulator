@@ -2,6 +2,7 @@
 #include "graphhandler.h"
 
 #include <math.h>
+#include <QTabBar>
 
 # define PI 3.14159265358979323846
 
@@ -46,7 +47,7 @@ void GraphHandler::fill_points_frequency_domain(QVector<QPointF> &points_contain
 {
     // we are interested only with the frequencies that lie between Fmin and Fmax obviously
     points_container.clear();
-    points_container.reserve(time_domain_points.size());
+    points_container.reserve(boundary);
     double R_max = 0;
     int i = -boundary / 2;
     for (int k = 0; k < boundary; ++k, ++i)
@@ -59,10 +60,18 @@ void GraphHandler::fill_points_frequency_domain(QVector<QPointF> &points_contain
 
         points_container.emplace_back(i, R);
     }
+
+    for (auto& p : points_container)
+    {
+        p.setY(p.y() / R_max);
+    }
 }
 
 GraphHandler::GraphHandler(QWidget *parent) : QTabWidget{parent}
 {
+    tabBar()->setDocumentMode(true);
+    tabBar()->setExpanding(true);
+
     // initialisation of lfm graph in time domain
     lfm_time_graph = new Graph(this);
     lfm_time_graph->set_argument_text("t, sec");
@@ -73,12 +82,13 @@ GraphHandler::GraphHandler(QWidget *parent) : QTabWidget{parent}
 
     // initialisation of lfm graph in frequency domain
     lfm_frequency_graph = new Graph(this);
-    lfm_frequency_graph->set_starting_point({350, lfm_frequency_graph->get_world_size().height() - 30});
+    lfm_frequency_graph->set_starting_point({400, lfm_frequency_graph->get_world_size().height() - 30});
     lfm_frequency_graph->set_graph_size({600, 500});
     lfm_frequency_graph->set_amplitude(500);
     lfm_frequency_graph->set_argument_text("f, Hz");
     lfm_frequency_graph->set_value_text("s(w)");
 
+    // y amplitude marks
     int m = 6;
     QVector<std::pair<double, QString> > marks_y(m);
     for (int i = 0; i < m; ++i)
@@ -89,11 +99,6 @@ GraphHandler::GraphHandler(QWidget *parent) : QTabWidget{parent}
 
     this->addTab(lfm_time_graph, "Time domain");
     this->addTab(lfm_frequency_graph, "Frequency domain");
-}
-
-GraphHandler::~GraphHandler()
-{
-
 }
 
 void GraphHandler::reset(LFMSettings settings)
@@ -108,23 +113,11 @@ void GraphHandler::reset(LFMSettings settings)
     fill_points_frequency_domain(freq_points, lfm_points, (2.0 * settings.cf) / settings.mf);
 
     // x marks
-    QVector<std::pair<int, QString> > marks_x(2);
-    marks_x[0] = {(settings.cf - settings.fd) / settings.mf, QString::number(settings.cf - settings.fd) + "Hz"};
-    marks_x[1] = {freq_points.size() - (settings.cf - settings.fd) / settings.mf, QString::number(settings.fd + settings.cf) + "Hz"};
+    QVector<std::pair<int, QString> > marks_x(3);
+    marks_x[0] = {(settings.cf - settings.fd) / settings.mf, QString::number(settings.mf * int(settings.cf / settings.mf) - settings.mf * std::ceil(settings.fd / settings.mf)) + "Hz"};
+    marks_x[1] = {(settings.cf + settings.fd) / settings.mf, QString::number(settings.mf * std::ceil(settings.cf / settings.mf) + settings.mf * std::ceil(settings.fd / settings.mf)) + "Hz"};
+    marks_x[2] = {settings.cf / settings.mf, QString::number(settings.cf) + "Hz"};
     lfm_frequency_graph->set_special_marks_x(marks_x);
-
-    // y marks
-    double max_R = 0;
-    for (auto& p : freq_points)
-    {
-        if (p.y() > max_R)
-            max_R = p.y();
-    }
-
-    for (auto& p : freq_points)
-    {
-        p.setY(p.y() / max_R);
-    }
     lfm_frequency_graph->update_points(freq_points);
 
     lfm_time_graph->update();

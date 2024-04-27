@@ -2,15 +2,11 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-
 #include <QWidget>
-#include <QPixmap>
-#include <QPainter>
 #include <QVector>
 #include <QPointF>
 #include <QSizeF>
 #include <QString>
-#include <QRect>
 
 class Graph : public QWidget
 {
@@ -44,13 +40,10 @@ private:
 
     // vector of points taken from handler
     QVector<QPointF> points;
-
-    int text_size = 13;
 protected:
     void paintEvent(QPaintEvent* event);
 public:
     Graph(QWidget *parent = nullptr);
-    Graph(QWidget *parent, const QVector<QPointF> &_points);
 
     QSizeF get_world_size();
 
@@ -61,12 +54,12 @@ public:
     void set_value_text(QString text);
     void set_amplitude_text(QString text);
 
-    void set_special_marks_x(QVector<std::pair<int, QString> >& new_marks);
-    void set_special_marks_y(QVector<std::pair<double, QString> >& new_marks);
-
     void set_amplitude(double amplitude);
 
-    void update_points(QVector<QPointF>& new_points);
+    void set_special_marks_x(const QVector<std::pair<int, QString> >& new_marks);
+    void set_special_marks_y(const QVector<std::pair<double, QString> >& new_marks);
+
+    void update_points(const QVector<QPointF>& new_points);
 };
 
 #endif // GRAPH_H

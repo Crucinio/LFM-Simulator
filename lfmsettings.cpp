@@ -11,13 +11,14 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     main_layout->setSpacing(settings_padding_y);
     main_layout->setAlignment(Qt::AlignTop);
 
+    int spacing = 10;
 
     // EXPLANATION
     explanation_label = new QLabel("Explanation of terms", this);
     mf_explanation_label = new QLabel("MF - Modulating Frequency", this);
     cf_explanation_label = new QLabel("CF - Carrier Frequensy", this);
     fd_explanation_label = new QLabel("FD - Frequency Deviation", this);
-    sf_explanation_label = new QLabel("ST = Sampling Frequency", this);
+    sf_explanation_label = new QLabel("SF = Sampling Frequency", this);
 
     main_layout->addWidget(explanation_label);
     main_layout->addWidget(mf_explanation_label);
@@ -26,7 +27,7 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     main_layout->addWidget(sf_explanation_label);
     // EXPLANATION END
 
-    main_layout->addSpacing(10);
+    main_layout->addSpacing(spacing);
 
     // CONSTRAINTS
     constraint_label = new QLabel("Constraints", this);
@@ -42,7 +43,7 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     main_layout->addWidget(constraint_sf_label);
     // CONSTRAINTS END
 
-    main_layout->addSpacing(10);
+    main_layout->addSpacing(spacing);
 
     // INPUT
     input_layout = new QHBoxLayout();
@@ -68,9 +69,9 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     sf_line_edit = new QLineEdit("100000", this);
 
     mf_validator = new QDoubleValidator(LFMSettings::mf_min, LFMSettings::mf_max, LFMSettings::precision, this);
-    cf_validator = new QDoubleValidator(LFMSettings::cf_min, LFMSettings::cf_max, LFMSettings::precision, this);
-    fd_validator = new QDoubleValidator(LFMSettings::fd_min, LFMSettings::fd_max, LFMSettings::precision, this);
-    sf_validator = new QDoubleValidator(LFMSettings::sf_min, LFMSettings::sf_max, LFMSettings::precision, this);
+    cf_validator = new QIntValidator(LFMSettings::cf_min, LFMSettings::cf_max, this);
+    fd_validator = new QIntValidator(LFMSettings::fd_min, LFMSettings::fd_max, this);
+    sf_validator = new QIntValidator(LFMSettings::sf_min, LFMSettings::sf_max, this);
 
     QLocale locale("en_US");
     mf_validator->setLocale(locale);
@@ -88,13 +89,12 @@ LFMSettingsWidget::LFMSettingsWidget(QWidget *parent)
     input_edits_layout->addWidget(fd_line_edit);
     input_edits_layout->addWidget(sf_line_edit);
 
-
     input_layout->addLayout(input_labels_layout);
     input_layout->addLayout(input_edits_layout);
     main_layout->addLayout(input_layout);
     // INPUT END
 
-    main_layout->addSpacing(10);
+    main_layout->addSpacing(spacing);
 
     // CURRENT DATA
     last_data_label = new QLabel("Last input");
@@ -130,7 +130,6 @@ LFMSettings LFMSettingsWidget::check_settings(bool& ok)
         return settings;
     }
 
-
     // CF checks
     settings.cf = cf_line_edit->text().toDouble();
     if (settings.cf / settings.mf < settings.cf_to_mf_min)
@@ -149,9 +148,9 @@ LFMSettings LFMSettingsWidget::check_settings(bool& ok)
 
     // FD checks
     settings.fd = fd_line_edit->text().toDouble();
-    if (settings.fd > settings.cf)
+    if (settings.fd >= settings.cf)
     {
-        notify_input_invalid("Frequency Deviation cannot be higher than Carrier Frequency!", "!FD INVALID INPUT!");
+        notify_input_invalid("Frequency Deviation must be less than Carrier Frequency!", "!FD INVALID INPUT!");
         return settings;
     }
 

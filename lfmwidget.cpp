@@ -6,9 +6,6 @@ LFMWidget::LFMWidget(QWidget *parent)
     : QWidget(parent)
 {
     setMinimumSize(800, 600);
-    // init
-    settings_widget = new LFMSettingsWidget(this);
-
 
     // styling
     main_layout->setAlignment(Qt::AlignTop);
@@ -21,11 +18,6 @@ LFMWidget::LFMWidget(QWidget *parent)
 
     // signal-slot
     connect(settings_widget, &LFMSettingsWidget::new_data_sent, graphs, &GraphHandler::reset);
-}
-
-LFMWidget::~LFMWidget()
-{
-
 }
 
 

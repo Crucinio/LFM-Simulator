@@ -9,8 +9,8 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
+#include <QIntValidator>
 #include <QDoubleValidator>
-#include <QCheckBox>
 
 // settings that we will pass to the controller
 struct LFMSettings
@@ -23,26 +23,26 @@ struct LFMSettings
     double mf = 1;
 
     // carrying frequency
-    static constexpr double cf_min = 1;
-    static constexpr double cf_max = 10000;
-    double cf = 10;
+    static constexpr long long cf_min = 1;
+    static constexpr long long cf_max = 10000;
+    long long cf = 10;
 
     // frequency deviation
-    static constexpr double fd_min = 0;
-    static constexpr double fd_max = 10000;
-    double fd = 0;
+    static constexpr long long fd_min = 0;
+    static constexpr long long fd_max = 10000;
+    long long fd = 0;
 
     // sampling frequency
-    static constexpr double sf_min = 100;
-    static constexpr double sf_max = 10000000;
-    double sf = 100;;
+    static constexpr long long sf_min = 100;
+    static constexpr long long sf_max = 10000000;
+    long long sf = 100;;
 
     // relative constraints
-    static constexpr double cf_to_mf_min = 5;
-    static constexpr double cf_to_mf_max = 1000;
+    static constexpr long long cf_to_mf_min = 5;
+    static constexpr long long cf_to_mf_max = 1000;
 
-    static constexpr double sf_to_cf_x_fd_min = 100;
-    static constexpr double sf_to_mf_max = 500000;
+    static constexpr long long sf_to_cf_x_fd_min = 100;
+    static constexpr long long sf_to_mf_max = 500000;
 };
 
 // UI class for data input
@@ -101,10 +101,9 @@ private:
 
     // input chats validators, could have used regex validator, but this one should be as fine
     QDoubleValidator* mf_validator;
-    QDoubleValidator* cf_validator;
-    QDoubleValidator* fd_validator;
-    QDoubleValidator* sf_validator;
-
+    QIntValidator* cf_validator;
+    QIntValidator* fd_validator;
+    QIntValidator* sf_validator;
 
     // buttons
     QPushButton reset_button = QPushButton(tr("RESET"));

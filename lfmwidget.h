@@ -25,7 +25,7 @@ private:
     QHBoxLayout* main_layout = new QHBoxLayout(this);
 public:
     LFMWidget(QWidget *parent = nullptr);
-    ~LFMWidget();
+    ~LFMWidget() = default;
 };
 
 #endif // LFMWIDGET_H
